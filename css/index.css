@@ -56,3 +56,6 @@ footer{
   background-color: transparent;
   outline: none;
 }
+video{
+  height:200px;
+}
