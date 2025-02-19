@@ -1,29 +1,32 @@
+<!-- record.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="js/index.js"></script>  
-    <title>Record Page</title>
+  <meta charset="UTF-8">
+  <title>Display Messages</title>
 </head>
 <body>
+  <h1>Saved Messages</h1>
+  <div id="messagesContainer"></div>
 
-    <h2>Stored Data from Index Page</h2>
-    <p id="displayStoredData">Loading...</p>
-<button id="btnDisplay">displaySms</button>
-    <br>
-    <a href="index.html">Back to Index</a>
+  <script>
+    // Retrieve the stored messages array from localStorage
+    const messages = JSON.parse(localStorage.getItem('smsData')) || [];
 
-<script>
-  function displaySms(){
-  let dataSave = localStorage.getItem('dataSave');
-            if (dataSave) {
-               document.getElementById("displayStoredData").textContent = dataSave;
-            }
-}
-document.getElementById('btnDisplay').addEventListener('click',displaySms);
+    // Get the container element
+    const container = document.getElementById('messagesContainer');
 
-</script>
-
+    // Check if there are any messages
+    if (messages.length === 0) {
+      container.textContent = 'No messages found.';
+    } else {
+      // Loop through each message and create a paragraph element to display it
+      messages.forEach(function(msg, index) {
+        const p = document.createElement('p');
+        p.textContent = `${index + 1}. ${msg}`;
+        container.appendChild(p);
+      });
+    }
+  </script>
 </body>
 </html>
