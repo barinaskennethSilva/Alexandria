@@ -1,34 +1,55 @@
-document.addEventListener('DOMContentLoaded', function () {
-const sendBtn = document.getElementById('send-btn');
-const textInput = document.getElementById('text-input');
-const containerText = document.getElementById('container-text');
 
 let artificialData = [];
 //Alexandria memory storage
 fetch(".env/data.txt").then(response =>response.json()).then(data=>{
   artificialData = data;
-}).catch(error=>console.error("error loading chatData:",error))
+}).catch(error=>userInput.error("error loading chatData:",error))
 
 
 
 function sendMessage(){
-  const message = textInput.value.trim();
+  const textInput = document.getElementById('text-input');
+  let message = textInput.value.trim();
+  if(message === "") return;
+  //alert("hello world")
+   addMessage("user",message);
+    textInput.value = '';
+  processMessage(message);
     
-  if(message !== ''){
- 
-    const smsText = document.createElement('div');
-    smsText.classList.add('userInput');
-    const response = document.createElement('div');
-    response.classList.add('AIresponse')
-smsText.textContent = message;
-containerText.appendChild(smsText);
-containerText.scrollTop = containerText.scrollHeight;
-textInput.value = '';
-document.getElementById('Info-Data').style.display = "none";
-containerText.style.display = "block"
-  }
+
+}
+function addMessage(sender,text){
+ const containerText = document.getElementById('container-text');
+  const smsText = document.createElement('div');
+    smsText.classList.add('userInput',sender + "-message");
+    smsText.textContent = text;
+    containerText.appendChild(smsText);
+    containerText.scrollTop = containerText.scrollHeight;
 }
 
-sendBtn.addEventListener('click',sendMessage);
-});
 
+
+function similarity(str1,str2){
+  const words1 = str1.toLowerCase().split(/\W+/);
+  const words2 = str2.toLowerCase().split(/\W+/);
+  let common = 0;
+  words1.forEach(word=>{
+    if(word && words2.includes(word)) common++;
+  });
+  return common;
+}
+function processMessage(message){
+  let bestMatch = null;
+  let D1 = 0;
+artificialData.forEach(pair=>{
+  let D = similarity(message, pair.input);
+  D1 = D;
+  bestMatch = pair;
+});
+if (D1 === 0 || !bestMatch){
+  addMessage("bot", "I'm not sure how to respond to that.");
+}
+else {
+        addMessage("bot", bestMatch.response);
+      }
+}

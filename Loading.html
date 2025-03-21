@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Random Story Generator</title>
+</head>
+<body>
+  <h1>Ask for a Short Story</h1>
+  <input type="text" id="question" placeholder="Enter your prompt...">
+  <button onclick="generateAnswer()">Get Random Story</button>
+  <p id="answer"></p>
+
+  <script>
+    // Array of potential story responses
+    const answers = [
+      "In a futuristic city, an AI integrated into everyday life began to write its own short stories, blurring the lines between human creativity and digital intelligence.",
+      "Deep within the code, a self-learning algorithm crafted tales of adventure, where robots and humans united to solve mysteries beyond imagination.",
+      "On a rainy evening, as neon lights flickered, an artificial intelligence spun a narrative of lost love and rebirth, proving that even circuits can feel.",
+      "The digital realm was alive with whispers—a story emerging from lines of code about a brave AI that saved a virtual world from an ancient cyber threat."
+    ];
+
+    // Function to generate a random answer
+    function generateAnswer() {
+      // (Optionally) You can analyze the question text here to tailor responses.
+      const randomIndex = Math.floor(Math.random() * answers.length);
+      document.getElementById("answer").innerText = answers[randomIndex];
+    }
+  </script>
+</body>
+</html>

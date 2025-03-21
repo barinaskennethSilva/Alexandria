@@ -24,9 +24,9 @@
   float: right;
   margin-top: 50px;
 }
-.AIresponse{
+.bot-message{
   color: #fff;
-  background-color: #111;
+  background-color: darkgrey;
   border-radius: 5px;
   width: 80%;
   padding: 10px;
