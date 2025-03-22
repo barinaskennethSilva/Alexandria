@@ -1,14 +1,16 @@
 
 let artificialData = [];
 //Alexandria memory storage
-fetch(".env/data.txt").then(response =>response.json()).then(data=>{
+fetch("http://localhost:8158/.env/data.txt").then(response =>response.json()).then( data=>{
   artificialData = data;
-}).catch(error=>userInput.error("error loading chatData:",error))
+}).catch(error=>userInput.error("error loading chatData:",error));
 
 
 
 function sendMessage(){
   const textInput = document.getElementById('text-input');
+  document.getElementById('container-text').style.display = "block";
+  document.getElementById('Info-Data').style.display = "none";
   let message = textInput.value.trim();
   if(message === "") return;
   //alert("hello world")
@@ -38,18 +40,23 @@ function similarity(str1,str2){
   });
   return common;
 }
-function processMessage(message){
-  let bestMatch = null;
-  let D1 = 0;
-artificialData.forEach(pair=>{
-  let D = similarity(message, pair.input);
-  D1 = D;
-  bestMatch = pair;
-});
-if (D1 === 0 || !bestMatch){
-  addMessage("bot", "I'm not sure how to respond to that.");
-}
-else {
+function processMessage(message) {
+      let bestMatch = null;
+      let highestScore = 0;
+
+      // Loop through each conversation pair in chatData.
+      artificialData.forEach(pair => {
+        let score = similarity(message, pair.input);
+        if (score > highestScore) {
+          highestScore = score;
+          bestMatch = pair;
+        }
+      });
+
+      // If no match is found (score is zero), use a default response.
+      if (highestScore === 0 || !bestMatch) {
+        addMessage("bot", "I'm not sure how to respond to that.");
+      } else {
         addMessage("bot", bestMatch.response);
       }
-}
+    }
