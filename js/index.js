@@ -55,8 +55,8 @@ function processMessage(message) {
 
       // If no match is found (score is zero), use a default response.
       if (highestScore === 0 || !bestMatch) {
-        addMessage("bot", "I'm not sure how to respond to that.");
+        addMessage("Alexandria", "I'm not sure how to respond to that.");
       } else {
-        addMessage("bot", bestMatch.response);
+        addMessage("Alexandria", bestMatch.response);
       }
     }
