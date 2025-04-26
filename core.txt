@@ -1,0 +1,22 @@
+[
+  {
+    "input": "hello",
+    "response": "Hello! How can I help you today?"
+  },
+  {
+    "input": "hi",
+    "response": "Hi there! What can I do for you?"
+  },
+  {
+    "input": "how are you",
+    "response": "I'm just a bot, but I'm here to assist you!"
+  },
+  {
+    "input": "what's the weather like",
+    "response": "I can't check the weather at the moment, but I hope it's nice where you are!"
+  },
+  {
+    "input": "bye",
+    "response": "Goodbye! Have a great day!"
+  }
+]

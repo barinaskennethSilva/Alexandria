@@ -1,22 +1,34 @@
-[
-  {
-    "input": "hello",
-    "response": "Hello! How can I help you today?"
-  },
-  {
-    "input": "hi",
-    "response": "Hi there! What can I do for you?"
-  },
-  {
-    "input": "how are you",
-    "response": "I'm just a bot, but I'm here to assist you!"
-  },
-  {
-    "input": "what's the weather like",
-    "response": "I can't check the weather at the moment, but I hope it's nice where you are!"
-  },
-  {
-    "input": "bye",
-    "response": "Goodbye! Have a great day!"
-  }
-]
+{
+  "history": [
+    {
+      "year": 1956,
+      "event": "Dartmouth Conference",
+      "description": "The Dartmouth Conference is widely considered the birth of AI, where the term 'artificial intelligence' was coined."
+    },
+    {
+      "year": 1966,
+      "event": "ELIZA",
+      "description": "ELIZA, one of the first chatbots, was developed to simulate human conversation."
+    },
+    {
+      "year": 1972,
+      "event": "Shakey the Robot",
+      "description": "Shakey was the first general-purpose mobile robot, integrating AI for navigation and decision-making."
+    },
+    {
+      "year": 1987,
+      "event": "First AI Winter",
+      "description": "A period of reduced funding and interest in AI research, known as the AI Winter, began due to unmet expectations."
+    },
+    {
+      "year": 2011,
+      "event": "IBM Watson",
+      "description": "IBM Watson gained fame by defeating human champions on Jeopardy, demonstrating the progress of AI."
+    },
+    {
+      "year": 2018,
+      "event": "Deep Learning Revolution",
+      "description": "Breakthroughs in deep learning and neural networks significantly advanced AI applications across various fields."
+    }
+  ]
+}

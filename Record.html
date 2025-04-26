@@ -3,151 +3,80 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chatbot with External Data</title>
+  <title>Local AI Chatbot</title>
+  <!-- Load Brain.js from CDN -->
+<script src="//unpkg.com/brain.js"></script>
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .chat-container {
-      width: 400px;
-      max-width: 90%;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    .chat-box {
-      height: 300px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 5px;
-      background: #fafafa;
-    }
-    .message {
-      margin: 8px 0;
-      padding: 8px;
-      border-radius: 4px;
-      max-width: 80%;
-      word-wrap: break-word;
-    }
-    .user-message {
-      background-color: #d0eaff;
-      align-self: flex-end;
-      margin-left: auto;
-      text-align: right;
-    }
-    .bot-message {
-      background-color: #d4f4dd;
-      align-self: flex-start;
-      text-align: left;
-    }
-    .input-container {
-      display: flex;
-    }
-    input[type="text"] {
-      flex: 1;
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      padding: 10px 15px;
-      font-size: 16px;
-      margin-left: 10px;
-      border: none;
-      border-radius: 4px;
-      background-color: #4caf50;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #chatbox { width: 300px; height: 400px; border: 1px solid #ccc; overflow-y: scroll; margin-bottom: 10px; padding: 10px; }
+    p { margin: 5px 0; }
   </style>
 </head>
 <body>
-  <div class="chat-container">
-    <div class="chat-box" id="chat-box"></div>
-    <div class="input-container">
-      <input type="text" id="user-input" placeholder="Type your message..." />
-      <button onclick="sendMessage()">Send</button>
-    </div>
-  </div>
+  <h2>Local AI Chatbot</h2>
+  <div id="chatbox"></div>
+  <input type="text" id="userInput" placeholder="Ask something..." />
+  <button onclick="sendMessage()">Send</button>
 
   <script>
-    let chatData = [];
+  document.addEventListener('DOMContentLoaded' ,function(){
+    const net = new brain.recurrent.LSTM();
 
-    // Load conversation pairs from data.txt on page load.
-    fetch(".env/data.txt")
-      .then(response => response.json())
-      .then(data => {
-        chatData = data;
-      })
-      .catch(error => console.error("Error loading chat data:", error));
-
-    // Send user message.
-    function sendMessage() {
-      const inputField = document.getElementById("user-input");
-      let message = inputField.value.trim();
-      if (message === "") return;
-
-      addMessage("user", message);
-      inputField.value = "";
-      processMessage(message);
-    }
-
-    // Add messages to the chat box.
-    function addMessage(sender, text) {
-      const chatBox = document.getElementById("chat-box");
-      const messageDiv = document.createElement("div");
-      messageDiv.classList.add("message", sender + "-message");
-      messageDiv.textContent = text;
-      chatBox.appendChild(messageDiv);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    // Calculate a simple similarity score between two strings based on common words.
-    function similarity(str1, str2) {
-      const words1 = str1.toLowerCase().split(/\W+/);
-      const words2 = str2.toLowerCase().split(/\W+/);
-      let common = 0;
-      words1.forEach(word => {
-        if (word && words2.includes(word)) common++;
-      });
-      return common;
-    }
-
-    // Process the user input and pick the best response from the loaded data.
-    function processMessage(message) {
-      let bestMatch = null;
-      let highestScore = 0;
-
-      // Loop through each conversation pair in chatData.
-      chatData.forEach(pair => {
-        let score = similarity(message, pair.input);
-        if (score > highestScore) {
-          highestScore = score;
-          bestMatch = pair;
+    // Function to parse the contents of core.txt.
+    // We expect each training example to have two lines:
+    // one starting with "User:" and the next with "Bot:".
+    // Blank lines are used to separate examples.
+    function parseCoreText(data) {
+      const pairs = [];
+      // Split by double newlines (i.e., blank line) for each example.
+      const entries = data.split(/\n\s*\n/);
+      entries.forEach(entry => {
+        // Split entry into individual lines.
+        const lines = entry.split('\n').map(line => line.trim()).filter(line => line);
+        if (lines.length >= 2) {
+          const userLine = lines.find(line => line.toLowerCase().startsWith('user:'));
+          const botLine = lines.find(line => line.toLowerCase().startsWith('bot:'));
+          if (userLine && botLine) {
+            const userInput = userLine.replace(/user:/i, '').trim();
+            const botOutput = botLine.replace(/bot:/i, '').trim();
+            pairs.push({ input: userInput.toLowerCase(), output: botOutput });
+          }
         }
       });
-
-      // If no match is found (score is zero), use a default response.
-      if (highestScore === 0 || !bestMatch) {
-        addMessage("bot", "I'm not sure how to respond to that.");
-      } else {
-        addMessage("bot", bestMatch.response);
-      }
+      return pairs;
     }
+
+    // Load core.txt and train the network once the file is fetched.
+    fetch('core.txt')
+      .then(response => response.text())
+      .then(data => {
+        const trainingData = parseCoreText(data);
+        console.log('Training data:', trainingData); // Check your parsed pairs in the console.
+        net.train(trainingData, {
+          iterations: 2000,   // Adjust iterations as needed
+          errorThresh: 0.005, // Lower error threshold for better training
+          log: true,
+          logPeriod: 100
+        });
+      })
+      .catch(error => console.error('Error loading training data:', error));
+
+    function sendMessage() {
+      const userInput = document.getElementById("userInput").value;
+      if (!userInput) return;
+
+      const chatbox = document.getElementById("chatbox");
+      chatbox.innerHTML += `<p><strong>User:</strong> ${userInput}</p>`;
+
+      // Use the network to generate a response.
+      // Make sure to lowercase or preprocess userInput as done during training.
+      const botResponse = net.run(userInput.toLowerCase()) || "I don't understand.";
+      chatbox.innerHTML += `<p><strong>Bot:</strong> ${botResponse}</p>`;
+      chatbox.scrollTop = chatbox.scrollHeight;
+      document.getElementById("userInput").value = "";
+    }
+  });
   </script>
 </body>
 </html>

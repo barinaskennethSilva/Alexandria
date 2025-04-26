@@ -8,6 +8,7 @@ fetch("http://localhost:8158/.env/data.txt").then(response =>response.json()).th
 
 
 function sendMessage(){
+  document.getElementById('video').pause();
   const textInput = document.getElementById('text-input');
   document.getElementById('container-text').style.display = "block";
   document.getElementById('Info-Data').style.display = "none";
