@@ -81,7 +81,12 @@ return padded;
 function Vectorsize(PaddedSequence){
 const embeddingDim = 4;
 const embeddingMatrix = {};
-
+Object.values(tokenMap).forEach(id=>{
+  embeddingMatrix[id] = Array.from({
+    length:embeddingDim},()=>parseFloat(Math.random().toFixed(2)));
+});
+embeddingMatrix[0] = Array(embeddingDim).fill(0);
+return PaddedSequence.map(id=>embeddingMatrix[id]);
 }
 //sending Sms
  document.getElementById('send-btn').addEventListener("click",()=>{
@@ -94,7 +99,8 @@ const embeddingMatrix = {};
   //
   const token = tokenization(sms);
   const padding = paddSequence(token);
-  console.log(padding);
+  const vectors = Vectorsize(padding);
+  console.log(vectors);
   DisplaySms('User',sms);
   const botRply = botResponse();
   DisplaySms('Alexandria',botRply);
