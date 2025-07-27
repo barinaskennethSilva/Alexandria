@@ -1,63 +1,33 @@
-
-let artificialData = [];
-//Alexandria memory storage
-fetch("http://localhost:8158/.env/data.txt").then(response =>response.json()).then( data=>{
-  artificialData = data;
-}).catch(error=>userInput.error("error loading chatData:",error));
-
-
-
-function sendMessage(){
-  document.getElementById('video').pause();
+document.addEventListener('DOMContentLoaded', async () => {
+//Element Id
+ const containerText = document.getElementById('container-text')
   const textInput = document.getElementById('text-input');
-  document.getElementById('container-text').style.display = "block";
+  
+ document.getElementById('send-btn').addEventListener("click",()=>{
+   const sms = textInput.value.toLowerCase().trim();
+   if (!sms) return;
+ //  
+ document.getElementById('video').pause();
+ containerText.style.display = "block";
   document.getElementById('Info-Data').style.display = "none";
-  let message = textInput.value.trim();
-  if(message === "") return;
-  //alert("hello world")
-   addMessage("user",message);
-    textInput.value = '';
-  processMessage(message);
+  //
+  DisplaySms('User',sms);
+  DisplaySms('Alexandria-message',sms);
+ });
+ 
+ function DisplaySms(sender,sms) {
+   const message = document.createElement('div');
+   message.classList.add(sender === 'User'? 'user-sms': 'Alexandria-message');
+   message.textContent = `${sender}:${sms}`;
+   if (sender === 'User') {
+    message.className = 'User';
+  } else {
+    message.className = 'Alexandria-message';
+  }
+   containerText.appendChild(message);
+   
+ }
+});
+
+
     
-
-}
-function addMessage(sender,text){
- const containerText = document.getElementById('container-text');
-  const smsText = document.createElement('div');
-    smsText.classList.add('userInput',sender + "-message");
-    smsText.textContent = text;
-    containerText.appendChild(smsText);
-    containerText.scrollTop = containerText.scrollHeight;
-}
-
-
-
-function similarity(str1,str2){
-  const words1 = str1.toLowerCase().split(/\W+/);
-  const words2 = str2.toLowerCase().split(/\W+/);
-  let common = 0;
-  words1.forEach(word=>{
-    if(word && words2.includes(word)) common++;
-  });
-  return common;
-}
-function processMessage(message) {
-      let bestMatch = null;
-      let highestScore = 0;
-
-      // Loop through each conversation pair in chatData.
-      artificialData.forEach(pair => {
-        let score = similarity(message, pair.input);
-        if (score > highestScore) {
-          highestScore = score;
-          bestMatch = pair;
-        }
-      });
-
-      // If no match is found (score is zero), use a default response.
-      if (highestScore === 0 || !bestMatch) {
-        addMessage("Alexandria", "I'm not sure how to respond to that.");
-      } else {
-        addMessage("Alexandria", bestMatch.response);
-      }
-    }
