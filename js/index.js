@@ -71,7 +71,18 @@ vocabWords.forEach((word,index)=>{
 function tokenization(input){
   return input.toLowerCase().split(/\s+/);
 }
+function paddSequence(sequence, maxLen=10){
+const padded = Array(maxLen).fill(0);
+for (let i = 0; i < Math.min(sequence.length,maxLen);i++){
+ padded[i] = tokenMap[sequence[i]] || 0;
+}
+return padded;
+}
+function Vectorsize(PaddedSequence){
+const embeddingDim = 4;
+const embeddingMatrix = {};
 
+}
 //sending Sms
  document.getElementById('send-btn').addEventListener("click",()=>{
    const sms = textInput.value.toLowerCase().trim();
@@ -82,14 +93,16 @@ function tokenization(input){
   document.getElementById('Info-Data').style.display = "none";
   //
   const token = tokenization(sms);
-  console.log(token);
+  const padding = paddSequence(token);
+  console.log(padding);
   DisplaySms('User',sms);
-  DisplaySms('Alexandria-message',sms);
+  const botRply = botResponse();
+  DisplaySms('Alexandria',botRply);
  });
  
  function DisplaySms(sender,sms) {
    const message = document.createElement('div');
-   message.classList.add(sender === 'User'? 'user-sms': 'Alexandria-message');
+   message.classList.add(sender === 'User'? 'user-sms': 'Alexandria');
    message.textContent = `${sender}:${sms}`;
    if (sender === 'User') {
     message.className = 'User';
@@ -98,6 +111,9 @@ function tokenization(input){
   }
    containerText.appendChild(message);
    
+ }
+ function botResponse(){
+   return "This Alexandria chatbot under developing process and part of princess Moonlight project";
  }
 });
 
