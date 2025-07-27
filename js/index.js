@@ -88,6 +88,18 @@ Object.values(tokenMap).forEach(id=>{
 embeddingMatrix[0] = Array(embeddingDim).fill(0);
 return PaddedSequence.map(id=>embeddingMatrix[id]);
 }
+//positional encoding
+function getPositionalEncoding(position,dModel){
+  const pe = [];
+  for(let i = 0; i < dModel; i++){
+    if(i % 2 === 0){
+  pe[i] = Math.sin(position / Math.pow(1000, i / dModel));   
+    } else{
+     pe[i] = Math.cos(position / Math.pow(1000, (i -1) / dModel));  
+    }
+  }
+  return pe;
+}
 //sending Sms
  document.getElementById('send-btn').addEventListener("click",()=>{
    const sms = textInput.value.toLowerCase().trim();
@@ -100,7 +112,10 @@ return PaddedSequence.map(id=>embeddingMatrix[id]);
   const token = tokenization(sms);
   const padding = paddSequence(token);
   const vectors = Vectorsize(padding);
-  console.log(vectors);
+ const dModel = 4;
+ const positionalEncodings = vectors.map((_,pos) => getPositionalEncoding(pos,dModel));
+ const combined = vectors.map((vec,i)=> vec.map((val,j)=> val + positionalEncodings[i][j] ))
+  console.log(combined);
   DisplaySms('User',sms);
   const botRply = botResponse();
   DisplaySms('Alexandria',botRply);
