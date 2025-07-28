@@ -100,6 +100,55 @@ function getPositionalEncoding(position,dModel){
   }
   return pe;
 }
+function MultiheadAttention(embeddings,numHeads=2){
+const headDim = embeddings[0].length / numHeads;
+const heads = [];
+for (let h = 0; h < numHeads; h++){
+ const Q = embeddings.map(vec => vec.slice(h * headDim, (h + 1) * headDim));
+ const K = Q;
+ const V = Q;
+ heads.push(singleHeadAttention(Q,K,V));
+}
+return heads[0].map((_,i)=> heads.flatMap(head => head[i]));
+}
+function singleHeadAttention(Q,K,V){
+  const dk = Q[0].length;
+  const KT = transpose(K);
+  const scores = dotProduct(Q,KT).map(row=> row.map(score=>score / Math.sqrt(dk)));
+  const softmaxed = scores.map(row => softmax(row) )
+return softmaxed.map((row,i)=>
+row.reduce(
+  (sumVec,score,j) => sumVec.map((val,k)=> val + score * V[j][k]), Array(V[0].length).fill(0)
+  )
+);
+}
+function transpose(matrix){
+  return matrix[0].map((_,i)=>matrix.map(row => row[i]));
+}
+function dotProduct(a,b){
+ return a.map(row => b[0].map((_,j) => row.reduce((sum, val ,k) => sum + val * b[k][j],0)));
+}
+function softmax(arr){
+const max = Math.max(...arr);
+const exps = arr.map(x => Math.exp(x - max));
+const sum = exps.reduce((a,b) => a + b);
+return exps.map(e => e / sum);
+}
+function layerNorm(vectors,epsilon = 1e-6){
+  return vectors.map(vec=>{
+ const mean = vec.reduce((sum,val) => sum + val, 0) / vec.length;
+ const variance = vec.reduce((sum,val) => sum + (val - mean) ** 2, 0) / vec.length;
+ return vec.map(val => (val - mean) / Math.sqrt(variance + epsilon));
+  });
+}
+function feedForwardNetwork(vectors){
+  return vectors.map(vec=>{
+const hidden = vec.map(x => Math.max(0, x* 1.1 + 0.5));
+const output = hidden.map(x => x * 0.8 + 0.3);
+return output;
+  });
+
+}
 //sending Sms
  document.getElementById('send-btn').addEventListener("click",()=>{
    const sms = textInput.value.toLowerCase().trim();
@@ -115,7 +164,16 @@ function getPositionalEncoding(position,dModel){
  const dModel = 4;
  const positionalEncodings = vectors.map((_,pos) => getPositionalEncoding(pos,dModel));
  const combined = vectors.map((vec,i)=> vec.map((val,j)=> val + positionalEncodings[i][j] ))
-  console.log(combined);
+const MultiHAOutput = MultiheadAttention(combined,2);
+// 1st add & norm
+const added = MultiHAOutput.map((vec,i)=>
+vec.map((val,j)=> val + combined[i][j]));
+const normalized = layerNorm(added);
+const ffn = feedForwardNetwork(normalized);
+// 2nd add & norm
+const added2 = ffn.map((vec,i)=>vec.map((val,j) => val + normalized[i][j]));
+const normalized2 = layerNorm(added2); 
+  console.log(normalized2);
   DisplaySms('User',sms);
   const botRply = botResponse();
   DisplaySms('Alexandria',botRply);
