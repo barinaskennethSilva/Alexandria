@@ -43,7 +43,7 @@ With the right dataset and proper training, your chatbot can improve over time a
 const intents = [
   {
     tag: 'greeting',
-    patterns: ['hello', 'hi', 'hey', 'good morning', 'good evening'],
+    patterns: ['hello', 'hi','hai', 'hey', 'good morning', 'good evening'],
     responses: ['Hello there!', 'Hi! How can I help you?', 'Greetings!']
   },
   {
@@ -62,6 +62,18 @@ const intents = [
     responses: ['Goodbye!', 'See you again soon!', 'Take care!']
   },
 ];
+function recognizeIntent(userInput){
+const cleanedInput = userInput.toLowerCase();
+for(let intent of intents){
+for(let pattern of intent.patterns){
+  if(cleanedInput.includes(pattern)){
+ const response = intent.responses[Math.floor(Math.random() * intent.responses.length)];
+ return response;
+  }
+}   
+}
+return null;
+}
 //Mapping
 const vocabWords = vocab.toLowerCase().split(/\s+/);
 vocabWords.forEach((word,index)=>{
@@ -149,6 +161,16 @@ return output;
   });
 
 }
+function MultiheadAttentionDecoder(Qinput,Kinput,numHeads = 2){
+ const headDim = Qinput[0].length / numHeads;
+ const heads = [];
+ for (let h = 0; h < numHeads; h++){
+ const Q = Qinput.map(vec => vec.slice(h * headDim, (h + 1) * headDim));
+ const V = K;
+ head.push(singleHeadAttention(Q,K,V));
+ }
+ return heads[0].map((_,i)=>heads.flatMap(head=>head[i]));
+}
 //sending Sms
  document.getElementById('send-btn').addEventListener("click",()=>{
    const sms = textInput.value.toLowerCase().trim();
@@ -173,10 +195,24 @@ const ffn = feedForwardNetwork(normalized);
 // 2nd add & norm
 const added2 = ffn.map((vec,i)=>vec.map((val,j) => val + normalized[i][j]));
 const normalized2 = layerNorm(added2); 
-  console.log(normalized2);
+const decoderInput = ["<start>","your","question"];
+const decoderPadded = paddSequence(decoderInput);
+const decoderVectors = Vectorsize(decoderPadded);
+const positionDeco = decoderVectors.map((_,pos)=>getPositionalEncoding(pos,4));
+const decoderCombined = decoderVectors.map((vec, i) => vec.map((val,j)=> val + positionDeco[i][j]));
+const maskedMHA = MultiheadAttention(decoderCombined,2);
+const maskedAdded = maskedMHA.map((vec,i) => vec.map((val,j) => val + decoderCombined[i][j]));
+  console.log(maskedAdded);
   DisplaySms('User',sms);
-  const botRply = botResponse();
+  const intentResponse = recognizeIntent(sms);
+  if(intentResponse){
+  DisplaySms('Alexandria',intentResponse);  
+  }else{
+    const botRply = botResponse();
   DisplaySms('Alexandria',botRply);
+  }
+  
+
  });
  
  function DisplaySms(sender,sms) {
